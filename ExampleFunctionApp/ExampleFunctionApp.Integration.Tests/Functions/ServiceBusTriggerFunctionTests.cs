@@ -67,7 +67,6 @@ public class ServiceBusTriggerFunctionTests
         await sut.Run(message, messageActions);
 
         // Assert
-        await messageActions.Received().CompleteMessageAsync(
-            message);
+        await messageActions.Received().CompleteMessageAsync(message);
     }
 }

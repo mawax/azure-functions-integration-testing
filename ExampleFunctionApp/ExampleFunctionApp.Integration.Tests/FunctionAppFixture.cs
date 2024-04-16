@@ -12,8 +12,10 @@ public class FunctionAppFixture : IAsyncLifetime
     {
         _host = new HostBuilder()
             .ConfigureFunctionsWorkerDefaults()
-            .ConfigureServices(services => services.AddServices())
             .ConfigureTestHost()
+            .ConfigureServices(services => services
+                .AddServices()
+                .AddTestServices())
             .Build();
     }
 
