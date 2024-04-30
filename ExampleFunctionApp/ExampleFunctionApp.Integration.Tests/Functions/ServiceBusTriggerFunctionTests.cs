@@ -1,9 +1,11 @@
 
 using Azure.Messaging.ServiceBus;
 using ExampleFunctionApp.Functions;
+using ExampleFunctionApp.Messages;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
+using System.Text.Json;
 
 namespace ExampleFunctionApp.Integration.Tests.Functions;
 
@@ -18,7 +20,7 @@ public class ServiceBusTriggerFunctionTests
     }
 
     [Fact]
-    public async Task ReceiveEvent_InvalidMessageBody_DeadletterQueuesMessage()
+    public async Task ReceiveEvent_InvalidMessageBody_FailsValidation()
     {
         // Arrange
         var sut = ActivatorUtilities.CreateInstance<ServiceBusTriggerFunction>(
@@ -36,16 +38,18 @@ public class ServiceBusTriggerFunctionTests
         var messageActions = Substitute.For<ServiceBusMessageActions>();
 
         // Act
-        await sut.Run(message, messageActions);
+        var result = await sut.Run(message, messageActions);
 
         // Assert
+        Assert.Null(result);
+
         await messageActions.Received().DeadLetterMessageAsync(
             message,
-            deadLetterReason: "Invalid message body");
+            deadLetterReason: Arg.Is<string>(r => r.Contains("Validation failed")));
     }
 
     [Fact]
-    public async Task ReceiveEvent_ValidMessageBody_CompletedMessage()
+    public async Task ReceiveEvent_ValidMessageBody_RepondsWithOutMessage()
     {
         // Arrange
         var sut = ActivatorUtilities.CreateInstance<ServiceBusTriggerFunction>(
@@ -53,7 +57,7 @@ public class ServiceBusTriggerFunctionTests
 
         var messageBody = """
             {
-                "id": 1000,
+                "itemId": 1000,
                 "category": "Books"
             }
             """;
@@ -64,9 +68,15 @@ public class ServiceBusTriggerFunctionTests
         var messageActions = Substitute.For<ServiceBusMessageActions>();
 
         // Act
-        await sut.Run(message, messageActions);
+        var result = await sut.Run(message, messageActions);
 
         // Assert
-        await messageActions.Received().CompleteMessageAsync(message);
+        Assert.NotNull(result);
+        Assert.Equal(
+            """
+            {"ItemId":1000}
+            """,
+            result);
+
     }
 }

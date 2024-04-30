@@ -4,5 +4,5 @@ namespace ExampleFunctionApp.Validators;
 
 public interface IExampleValidator
 {
-    bool ValidateExampleMessage(ExampleMessage message);
+    bool Validate(ExampleInMessage message);
 }
