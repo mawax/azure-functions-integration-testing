@@ -1,11 +1,8 @@
-
 using Azure.Messaging.ServiceBus;
 using ExampleFunctionApp.Functions;
-using ExampleFunctionApp.Messages;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
-using System.Text.Json;
 
 namespace ExampleFunctionApp.Integration.Tests.Functions;
 
